@@ -12,14 +12,50 @@ const nav = [
   ['Contact', 'contact.html']
 ];
 
-// Initialize theme and direction from localStorage
-if (localStorage.getItem('ah-theme') === 'dark') {
-  document.documentElement.dataset.theme = 'dark';
-}
-if (localStorage.getItem('ah-dir') === 'rtl') {
-  document.documentElement.dir = 'rtl';
+// Theme & RTL State Management
+// Theme Management
+function getSavedTheme() {
+  const saved = localStorage.getItem('ah-theme');
+  if (saved === 'dark' || saved === 'light') return saved;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem('ah-theme', theme);
+
+  // Update all theme toggle buttons across the DOM
+  document.querySelectorAll('#themeToggle, .theme-toggle').forEach(btn => {
+    btn.innerHTML = theme === 'dark' ? '☀️' : '◐';
+    btn.setAttribute('title', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+    btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode');
+  });
+}
+
+// Direction (RTL/LTR) Management
+function getSavedDir() {
+  return localStorage.getItem('ah-dir') === 'rtl' ? 'rtl' : 'ltr';
+}
+
+function applyDir(dir) {
+  document.documentElement.setAttribute('dir', dir);
+  document.documentElement.dir = dir;
+  localStorage.setItem('ah-dir', dir);
+
+  // Update all RTL toggle buttons across the DOM
+  document.querySelectorAll('#rtlToggle, .rtl-toggle').forEach(btn => {
+    btn.textContent = dir === 'rtl' ? 'LTR' : 'RTL';
+    btn.setAttribute('title', dir === 'rtl' ? 'Switch to LTR' : 'Switch to RTL');
+    btn.setAttribute('aria-label', dir === 'rtl' ? 'Switch to LTR' : 'Switch to RTL');
+  });
+}
+
+// Initial theme & direction application
+applyTheme(getSavedTheme());
+applyDir(getSavedDir());
+
+// Render Site Header
 if (header) {
   header.innerHTML = `
 <header class="site-header">
@@ -28,24 +64,35 @@ if (header) {
       <span class="brand-mark">≈</span>
       <span>Aqua<span>Harvest</span></span>
     </a>
-    <button class="mobile-menu" aria-label="Toggle navigation">☰</button>
-    <nav class="main-nav">
+
+    <!-- Center Navigation for Desktop -->
+    <nav class="main-nav" id="mainNav">
       ${nav.map(([n, u]) => `<a class="${current === u ? 'active' : ''}" href="${u}">${n}</a>`).join('')}
       <div class="mobile-nav-actions">
-        <a class="nav-login" href="login.html">Sign in</a>
+        <div class="mobile-nav-tools">
+          <button class="tool-btn rtl-toggle" id="rtlToggleMobile" title="Toggle RTL/LTR" aria-label="Toggle RTL">RTL</button>
+          <button class="tool-btn theme-toggle" id="themeToggleMobile" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">◐</button>
+        </div>
         <a class="btn btn-signup" href="signup.html">Sign up</a>
       </div>
     </nav>
+
+    <!-- Right Nav Tools & Hamburger Menu Button -->
     <div class="nav-tools">
-      <a class="nav-login desktop-only" href="login.html">Sign in</a>
-      <button class="tool-btn" id="rtlToggle" title="Toggle RTL/LTR" aria-label="Toggle RTL">RTL</button>
-      <button class="tool-btn" id="themeToggle" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">◐</button>
+      <button class="tool-btn rtl-toggle desktop-only" id="rtlToggle" title="Toggle RTL/LTR" aria-label="Toggle RTL">RTL</button>
+      <button class="tool-btn theme-toggle desktop-only" id="themeToggle" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">◐</button>
       <a class="btn btn-signup desktop-only" href="signup.html">Sign up</a>
+      <button class="mobile-menu" id="mobileMenuBtn" aria-label="Toggle navigation" aria-expanded="false">☰</button>
     </div>
   </div>
 </header>`;
+
+  // Refresh button labels after rendering header
+  applyTheme(getSavedTheme());
+  applyDir(getSavedDir());
 }
 
+// Render Site Footer
 if (footer) {
   footer.innerHTML = `
 <footer class="site-footer">
@@ -94,21 +141,103 @@ if (footer) {
 </footer>`;
 }
 
-// Bind Theme Toggle
-document.getElementById('themeToggle')?.addEventListener('click', () => {
-  const newTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = newTheme;
-  localStorage.setItem('ah-theme', newTheme);
-});
+// Universal Event Delegation for Theme, RTL, and Mobile Menu
+// Ensure Back to Top Button exists on all pages
+function initScrollTopButton() {
+  if (!document.getElementById('scrollTopBtn')) {
+    const btn = document.createElement('button');
+    btn.id = 'scrollTopBtn';
+    btn.className = 'scroll-top-btn';
+    btn.setAttribute('title', 'Back to top');
+    btn.setAttribute('aria-label', 'Scroll to top');
+    btn.innerHTML = '↑';
+    document.body.appendChild(btn);
+  }
 
-// Bind RTL Toggle
-document.getElementById('rtlToggle')?.addEventListener('click', () => {
-  const newDir = document.documentElement.dir === 'rtl' ? 'ltr' : 'rtl';
-  document.documentElement.dir = newDir;
-  localStorage.setItem('ah-dir', newDir);
-});
+  const scrollBtn = document.getElementById('scrollTopBtn');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 280) {
+      scrollBtn?.classList.add('visible');
+    } else {
+      scrollBtn?.classList.remove('visible');
+    }
+  });
 
-// Mobile menu toggle
-document.querySelector('.mobile-menu')?.addEventListener('click', () => {
-  document.querySelector('.main-nav')?.classList.toggle('open');
+  scrollBtn?.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initScrollTopButton);
+} else {
+  initScrollTopButton();
+}
+
+// Universal Event Delegation for Theme, RTL, Mobile Menu, and Scroll to Top
+document.addEventListener('click', (e) => {
+  // Theme Toggle Button clicked
+  const themeBtn = e.target.closest('#themeToggle, .theme-toggle');
+  if (themeBtn) {
+    e.preventDefault();
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(nextTheme);
+    return;
+  }
+
+  // RTL Toggle Button clicked
+  const rtlBtn = e.target.closest('#rtlToggle, .rtl-toggle');
+  if (rtlBtn) {
+    e.preventDefault();
+    const currentDir = document.documentElement.getAttribute('dir') || 'ltr';
+    const nextDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
+    applyDir(nextDir);
+    return;
+  }
+
+  // Scroll to Top Button clicked
+  const topBtn = e.target.closest('#scrollTopBtn, .scroll-top-btn');
+  if (topBtn) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // Hamburger Menu Button clicked
+  const menuBtn = e.target.closest('.mobile-menu, #mobileMenuBtn');
+  if (menuBtn) {
+    e.preventDefault();
+    const mainNav = document.getElementById('mainNav') || document.querySelector('.main-nav');
+    if (mainNav) {
+      const isOpen = mainNav.classList.toggle('open');
+      menuBtn.innerHTML = isOpen ? '✕' : '☰';
+      menuBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+    return;
+  }
+
+  // Close mobile nav when clicking a nav link inside it
+  const navLink = e.target.closest('.main-nav.open a');
+  if (navLink) {
+    const mainNav = document.querySelector('.main-nav.open');
+    if (mainNav) mainNav.classList.remove('open');
+    const menuBtn = document.querySelector('.mobile-menu');
+    if (menuBtn) {
+      menuBtn.innerHTML = '☰';
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+    return;
+  }
+
+  // Close mobile nav when clicking outside of it
+  const openNav = document.querySelector('.main-nav.open');
+  if (openNav && !e.target.closest('.main-nav') && !e.target.closest('.mobile-menu')) {
+    openNav.classList.remove('open');
+    const menuBtn = document.querySelector('.mobile-menu');
+    if (menuBtn) {
+      menuBtn.innerHTML = '☰';
+      menuBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
 });
