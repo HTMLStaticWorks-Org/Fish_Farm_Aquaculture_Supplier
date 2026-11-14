@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Create Account | AquaHarvest Aquaculture Supplier</title>
+  <link rel="icon" href="assets/images/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="auth-page">
+
+  <!-- RTL & Theme Toggle Outside the Card at Top Right Corner -->
+  <div class="auth-top-tools">
+    <button class="tool-btn" id="rtlToggle" title="Toggle RTL/LTR" aria-label="Toggle RTL">RTL</button>
+    <button class="tool-btn" id="themeToggle" title="Toggle Dark/Light Mode" aria-label="Toggle Theme">◐</button>
+  </div>
+
+  <main class="auth-shell">
+    <div class="auth-card">
+      <!-- Brand Inside the Card Aligned Center -->
+      <a class="brand auth-brand" href="index.html">
+        <span class="brand-mark">≈</span>
+        <span>Aqua<span>Harvest</span></span>
+      </a>
+
+      <span class="eyebrow">AQUAHARVEST ACCOUNT</span>
+      <h1>Grow with us.</h1>
+      <p class="muted">Create an account to keep your farm supplies and water monitoring close.</p>
+
+      <form class="auth-form" onsubmit="event.preventDefault();alert('Account created successfully! (Demo mode)');location.href='index.html';">
+        <label>
+          Full name
+          <input type="text" required placeholder="e.g. Ramesh Chandra">
+        </label>
+        <label>
+          Farm / Hatchery Name
+          <input type="text" placeholder="e.g. Blue Lagoon Fishery">
+        </label>
+        <label>
+          Work email address
+          <input type="email" required placeholder="farmer@aquafarm.com">
+        </label>
+        <label>
+          Password
+          <input type="password" minlength="8" required placeholder="At least 8 characters">
+        </label>
+        <button class="btn dark full" type="submit">Create account ↗</button>
+      </form>
+
+      <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
+
+      <div class="auth-social">
+        <small>CONNECT WITH AQUACULTURE EXPERTS</small>
+        <div class="social-row">
+          <a href="https://instagram.com" aria-label="Instagram">◎</a>
+          <a href="https://facebook.com" aria-label="Facebook">f</a>
+          <a href="https://linkedin.com" aria-label="LinkedIn">in</a>
+          <a href="https://youtube.com" aria-label="YouTube">▶</a>
+        </div>
+      </div>
+    </div>
+    <p class="auth-copy">© 2026 AquaHarvest. Growing better aquaculture, together.</p>
+  </main>
+
+  <script src="assets/js/site.js"></script>
+</body>
+</html>
